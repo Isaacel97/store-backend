@@ -11,13 +11,16 @@ export const getById = async (id: number) => {
 };
 
 export const create = async (data: any) => {
-  const { sku, name, image_url, price, type, status } = data;
+  const { sku, name, image_url, price, type, status, initial_stock } = data;
   const [result]: any = await pool.query(
     "INSERT INTO products (sku, name, image_url, price, type, status) VALUES (?, ?, ?, ?, ?, ?)",
     [sku, name, image_url, price, type, status || "active"]
   );
   // crear registro en inventario
-  await pool.query("INSERT INTO inventory (product_id, quantity) VALUES (?, 0)", [result.insertId]);
+  await pool.query(
+    "INSERT INTO inventory (product_id, quantity) VALUES (?, ?)",
+    [result.insertId, initial_stock ?? 0]
+  );
   return { id: result.insertId, ...data };
 };
 
