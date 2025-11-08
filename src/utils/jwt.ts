@@ -1,19 +1,22 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import fs from "fs";
+import path from "path";
 
-dotenv.config();
+const privateKey = fs.readFileSync(path.join(__dirname, "../keys/private.pem"));
+const publicKey = fs.readFileSync(path.join(__dirname, "../keys/public.pem"));
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
-const JWT_EXPIRES = '8h';
 
 export const JwtUtils = {
   generateToken(payload: object) {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+    return jwt.sign(payload, privateKey, { 
+      algorithm: 'RS256',
+      expiresIn: '6h' 
+    });
   },
 
   verifyToken(token: string) {
     try {
-      return jwt.verify(token, JWT_SECRET);
+      return jwt.verify(token, publicKey, { algorithms: ['RS256'] });
     } catch {
       return null;
     }
